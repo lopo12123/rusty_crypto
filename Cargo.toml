@@ -3,7 +3,7 @@ name = "rusty_crypto"
 version = "0.1.0"
 edition = "2021"
 authors = ["lopo<lopo@zju.edu.cn>"]
-license = "MIT OR Apache-2.0"
+license = "MIT"
 keywords = ["crypto", "rusty", "wasm", "webassembly"]
 
 [lib]
