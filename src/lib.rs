@@ -1,8 +1,10 @@
 mod utils;
+mod serde;
 
 extern crate wasm_bindgen;
 
 use wasm_bindgen::prelude::*;
+use crate::serde::Serde;
 
 #[wasm_bindgen]
 extern {
@@ -11,5 +13,10 @@ extern {
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hello! -- from rust.");
+    alert("Hi there! -- from rust.");
+}
+
+#[wasm_bindgen]
+pub fn encode_base64(s: &str) -> String {
+    Serde::encode_base64(s)
 }
