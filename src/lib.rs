@@ -14,7 +14,7 @@ extern {
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hi there! -- from rust.");
+    alert("Everything is rusted, and so is encryption.");
 }
 
 #[wasm_bindgen]

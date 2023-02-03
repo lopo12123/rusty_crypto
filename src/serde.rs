@@ -5,6 +5,8 @@ use aes::cipher::{
     KeyIvInit,
 };
 use crate::utils::{base64_bytes2str};
+use crate::glue::date;
+use crate::glue::date::JsDate;
 
 enum SeedType { Key, Iv }
 
@@ -30,13 +32,18 @@ impl Serde {
 
     /// 构建md5原文
     fn generate_seed_str(seed_type: SeedType) -> String {
-        // let date = OffsetDateTime::now_utc();
-        //
-        // format!("catalyst_plus_{}{}{}{}{}{}", match seed_type {
-        //     SeedType::Key => "key",
-        //     SeedType::Iv => "iv"
-        // }, date.year(), month_to_index(date.month()), date.day(), date.hour() + 8, date.minute() / 10)
-        String::from("1234567890")
+        format!(
+            "catalyst_plus_{}{}{}{}{}{}",
+            match seed_type {
+                SeedType::Key => "key",
+                SeedType::Iv => "iv"
+            },
+            JsDate::get_year_str(),
+            JsDate::get_month_str(false),
+            JsDate::get_day_str(true),
+            JsDate::get_hour_str(true),
+            JsDate::get_minute() / 10
+        )
     }
 
     /// 生成 key
