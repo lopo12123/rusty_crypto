@@ -4,7 +4,8 @@ use aes::cipher::{
     BlockEncryptMut,
     KeyIvInit,
 };
-use crate::utils::Base64;
+use wasm_bindgen::prelude::wasm_bindgen;
+use crate::utils::{Base64, MD5};
 use crate::glue::JsDate;
 
 enum SeedType { Key, Iv }
@@ -13,15 +14,12 @@ type Aes128CbcEnc = cbc::Encryptor<aes::Aes128Enc>;
 type Aes128CbcDec = cbc::Decryptor<aes::Aes128Dec>;
 
 /// 可加密的原文最大长度为 `u32.MAX - 1`
+#[wasm_bindgen]
 pub struct V1 {}
 
 #[allow(unused)]
+#[wasm_bindgen]
 impl V1 {
-    /// 计算字符串的 md5 值
-    fn calc_md5(str: String) -> [u8; 16] {
-        md5::compute(str).0
-    }
-
     /// 计算密文所需的 buffer 大小
     // 大于原始字节长度的, 16的最小倍数 (注意: 16加密后为32, 类推)
     fn calc_buf_size(plain: &str) -> usize {
@@ -46,14 +44,10 @@ impl V1 {
     }
 
     /// 生成 key
-    fn generate_key() -> [u8; 16] {
-        Self::calc_md5(Self::generate_seed_str(SeedType::Key))
-    }
+    fn generate_key() -> [u8; 16] { MD5::calc_buf(Self::generate_seed_str(SeedType::Key)) }
 
     /// 生成 iv
-    fn generate_iv() -> [u8; 16] {
-        Self::calc_md5(Self::generate_seed_str(SeedType::Iv))
-    }
+    fn generate_iv() -> [u8; 16] { MD5::calc_buf(Self::generate_seed_str(SeedType::Iv)) }
 
     /// 加密(若加密失败则返回空字符串) - 已测试
     pub fn encode_base64(str: &str) -> String {
