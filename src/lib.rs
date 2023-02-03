@@ -11,9 +11,10 @@ extern {
     fn alert(s: &str);
 }
 
+pub use crypto::V0;
 pub use crypto::V1;
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Everything is rusted, and so is encryption.");
+    alert("Everything is rusted, and so is encryption.  -- from rust.");
 }
