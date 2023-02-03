@@ -15,11 +15,11 @@ type Aes128CbcDec = cbc::Decryptor<aes::Aes128Dec>;
 
 /// 可加密的原文最大长度为 `u32.MAX - 1`
 #[wasm_bindgen]
-pub struct V1 {}
+pub struct V0 {}
 
 #[allow(unused)]
 #[wasm_bindgen]
-impl V1 {
+impl V0 {
     /// 计算密文所需的 buffer 大小
     // 大于原始字节长度的, 16的最小倍数 (注意: 16加密后为32, 类推)
     fn calc_container_size(plain: &str) -> usize {
@@ -35,11 +35,11 @@ impl V1 {
                 SeedType::Key => "key",
                 SeedType::Iv => "iv"
             },
-            JsDate::get_year_utc_str(),
-            JsDate::get_month_utc_str(false),
-            JsDate::get_day_utc_str(false),
-            JsDate::get_hour_utc_str(false),
-            JsDate::get_minute_utc() / 10
+            JsDate::get_year_str(),
+            JsDate::get_month_str(false),
+            JsDate::get_day_str(false),
+            JsDate::get_hour_str(false),
+            JsDate::get_minute() / 10
         )
     }
 
@@ -93,7 +93,7 @@ mod unit_test {
         fn run(i: u32) {
             let s = String::from("a".repeat(9000000));
             let t_start = SystemTime::now();
-            let _result = V1::encode_base64(&s);
+            let _result = V0::encode_base64(&s);
             println!("[{}] ok! elapsed: {}ms", i, t_start.elapsed().unwrap().as_millis());
         }
 
@@ -102,11 +102,11 @@ mod unit_test {
 
     #[test]
     fn decode_with_warmup() {
-        let str = V1::encode_base64(&String::from("a".repeat(9000000)));
+        let str = V0::encode_base64(&String::from("a".repeat(9000000)));
 
         let run = |i: u32| {
             let t_start = SystemTime::now();
-            let result = V1::decode_base64(&str);
+            let result = V0::decode_base64(&str);
             println!("[{}]elapsed: {}ms", i, t_start.elapsed().unwrap().as_millis());
 
             let mut is_ok = true;
@@ -125,14 +125,14 @@ mod unit_test {
     #[test]
     fn encode() {
         let str = "aaaaa";
-        let result = V1::encode_base64(&str);
+        let result = V0::encode_base64(&str);
         println!("result: {}", result);
     }
 
     #[test]
     fn decode() {
         let str = "sWF+8MNMGiSBbjNy5Z9i2Q==";
-        let result = V1::decode_base64(&str);
+        let result = V0::decode_base64(&str);
         println!("result: {}", result);
     }
 
