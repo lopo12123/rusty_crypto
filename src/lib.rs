@@ -1,11 +1,11 @@
-mod utils;
-mod serde;
-mod glue;
-
 extern crate wasm_bindgen;
 
+mod utils;
+mod glue;
+mod crypto;
+
 use wasm_bindgen::prelude::*;
-use crate::serde::Serde;
+use crypto::V1;
 
 #[wasm_bindgen]
 extern {
@@ -19,5 +19,5 @@ pub fn greet() {
 
 #[wasm_bindgen]
 pub fn encode_base64(s: &str) -> String {
-    Serde::encode_base64(s)
+    V1::encode_base64(s)
 }

@@ -4,9 +4,8 @@ use aes::cipher::{
     BlockEncryptMut,
     KeyIvInit,
 };
-use crate::utils::{base64_bytes2str};
-use crate::glue::date;
-use crate::glue::date::JsDate;
+use crate::utils::Base64;
+use crate::glue::JsDate;
 
 enum SeedType { Key, Iv }
 
@@ -14,10 +13,10 @@ type Aes128CbcEnc = cbc::Encryptor<aes::Aes128Enc>;
 type Aes128CbcDec = cbc::Decryptor<aes::Aes128Dec>;
 
 /// 可加密的原文最大长度为 `u32.MAX - 1`
-pub struct Serde {}
+pub struct V1 {}
 
 #[allow(unused)]
-impl Serde {
+impl V1 {
     /// 计算字符串的 md5 值
     fn calc_md5(str: String) -> [u8; 16] {
         md5::compute(str).0
@@ -40,8 +39,8 @@ impl Serde {
             },
             JsDate::get_year_str(),
             JsDate::get_month_str(false),
-            JsDate::get_day_str(true),
-            JsDate::get_hour_str(true),
+            JsDate::get_day_str(false),
+            JsDate::get_hour_str(false),
             JsDate::get_minute() / 10
         )
     }
@@ -67,7 +66,7 @@ impl Serde {
         match Aes128CbcEnc::new(&Self::generate_key().into(), &iv.into())
             .encrypt_padded_b2b_mut::<Pkcs7>(str.as_bytes(), &mut result_container)
         {
-            Ok(_) => base64_bytes2str(result_container),
+            Ok(_) => Base64::encode(result_container),
             Err(_) => String::from("")
         }
     }
@@ -76,12 +75,11 @@ impl Serde {
 #[cfg(test)]
 mod unit_test {
     use super::*;
-    use crate::utils::{base64_str2bytes, base64_bytes2str};
 
     #[test]
     fn encode() {
         let str = "hello";
-        let encoded = Serde::encode_base64(str);
+        let encoded = V1::encode_base64(str);
         println!("encoded: {:?}", encoded);
     }
 
@@ -89,7 +87,7 @@ mod unit_test {
     fn branch_encode() {
         for len in [90000000] {
             let s = String::from("a".repeat(len));
-            let result = Serde::encode_base64(&s);
+            let result = V1::encode_base64(&s);
             // println!("original: {}\nencoded: {}\n\n", s, result);
             if result.len() == 0 {
                 println!("error at {}", len);
@@ -113,7 +111,7 @@ mod unit_test {
     fn vec_to_str() {
         let bytes: Vec<u8> = vec![247, 212, 95, 28, 55, 20, 23, 202, 4, 33, 145, 249, 88, 149, 158, 85];
 
-        let s = base64_bytes2str(bytes);
+        let s = Base64::encode(bytes);
         println!("s: {}", s);
     }
 

@@ -1,1 +1,3 @@
-pub mod date;
+mod date;
+
+pub use date::JsDate;
