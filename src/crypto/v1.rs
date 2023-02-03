@@ -22,7 +22,7 @@ pub struct V1 {}
 impl V1 {
     /// 计算密文所需的 buffer 大小
     // 大于原始字节长度的, 16的最小倍数 (注意: 16加密后为32, 类推)
-    fn calc_buf_size(plain: &str) -> usize {
+    fn calc_container_size(plain: &str) -> usize {
         let byte_len = plain.as_bytes().len();
         (((byte_len as f32 / 16.0).floor() as usize) + 1) * 16
     }
@@ -49,12 +49,12 @@ impl V1 {
     /// 生成 iv
     fn generate_iv() -> [u8; 16] { MD5::calc_buf(Self::generate_seed_str(SeedType::Iv)) }
 
-    /// 加密(若加密失败则返回空字符串) - 已测试
+    /// 加密(若加密失败则返回空字符串)
     pub fn encode_base64(str: &str) -> String {
         let iv = Self::generate_iv();
 
-        // 大于原始长度的, 16的最小倍数 (注意: 16加密后为32, 类推)
-        let buf_size = Self::calc_buf_size(str);
+        // 大于原始字节长度的, 16的最小倍数 (注意: 16加密后为32, 类推)
+        let buf_size = Self::calc_container_size(str);
         let mut result_container = vec![0u8; buf_size];
 
         match Aes128CbcEnc::new(&Self::generate_key().into(), &iv.into())
@@ -64,54 +64,83 @@ impl V1 {
             Err(_) => String::from("")
         }
     }
+
+    /// 解密(若加密失败则返回空字符串)
+    pub fn decode_base64(str: &str) -> String {
+        let iv = Self::generate_iv();
+
+        // 解密后的字节长度不会超过密文的字节长度
+        let mut buf = Base64::decode(str).unwrap();
+
+        match Aes128CbcDec::new(&Self::generate_key().into(), &iv.into())
+            .decrypt_padded_mut::<Pkcs7>(&mut buf) {
+            Ok(result_buffer) => match String::from_utf8(result_buffer.to_vec()) {
+                Ok(result) => result,
+                Err(_) => String::from("")
+            }
+            Err(_) => String::from("")
+        }
+    }
 }
 
 #[cfg(test)]
 mod unit_test {
+    use std::time::SystemTime;
     use super::*;
 
     #[test]
-    fn encode() {
-        let str = "hello";
-        let encoded = V1::encode_base64(str);
-        println!("encoded: {:?}", encoded);
-    }
-
-    #[test]
-    fn branch_encode() {
-        for len in [90000000] {
-            let s = String::from("a".repeat(len));
-            let result = V1::encode_base64(&s);
-            // println!("original: {}\nencoded: {}\n\n", s, result);
-            if result.len() == 0 {
-                println!("error at {}", len);
-            }
+    fn encode_with_warmup() {
+        fn run(i: u32) {
+            let s = String::from("a".repeat(9000000));
+            let t_start = SystemTime::now();
+            let _result = V1::encode_base64(&s);
+            println!("[{}] ok! elapsed: {}ms", i, t_start.elapsed().unwrap().as_millis());
         }
-        println!("ok!");
+
+        for i in [0, 1, 2, 3] { run(i) }
     }
 
     #[test]
-    fn vec_size() {
-        // let mut v = vec![1u8, 2, 3, 4];
-        // let mut v: Vec<u8> = Vec::with_capacity(4);
-        let n = 10;
-        let mut v = vec![0; n];
-        let b = &mut v[..];
+    fn decode_with_warmup() {
+        let str = V1::encode_base64(&String::from("a".repeat(9000000)));
 
-        println!("{}", b.len());
+        let run = |i: u32| {
+            let t_start = SystemTime::now();
+            let result = V1::decode_base64(&str);
+            println!("[{}]elapsed: {}ms", i, t_start.elapsed().unwrap().as_millis());
+
+            let mut is_ok = true;
+            for char in result.chars() {
+                if char != 'a' {
+                    is_ok = false;
+                    break;
+                }
+            }
+            println!("[{}] is ok: {}", i, is_ok);
+        };
+
+        for i in [0, 1, 2, 3] { run(i) }
     }
 
     #[test]
-    fn vec_to_str() {
-        let bytes: Vec<u8> = vec![247, 212, 95, 28, 55, 20, 23, 202, 4, 33, 145, 249, 88, 149, 158, 85];
-
-        let s = Base64::encode(bytes);
-        println!("s: {}", s);
+    fn encode() {
+        let str = "aaaaa";
+        let result = V1::encode_base64(&str);
+        println!("result: {}", result);
     }
 
     #[test]
-    fn to_string() {
-        let s = format!("0{}", (12321.3));
-        println!("{}", s);
+    fn decode() {
+        let str = "sWF+8MNMGiSBbjNy5Z9i2Q==";
+        let result = V1::decode_base64(&str);
+        println!("result: {}", result);
+    }
+
+
+    #[test]
+    fn misc() {
+        for char in "abcdefg".to_string().chars() {
+            println!("char: {}", char);
+        }
     }
 }
