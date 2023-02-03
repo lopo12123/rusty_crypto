@@ -109,4 +109,10 @@ mod unit_test {
         let s = base64_bytes2str(bytes);
         println!("s: {}", s);
     }
+
+    #[test]
+    fn to_string() {
+        let s = format!("0{}", (12321.3));
+        println!("{}", s);
+    }
 }

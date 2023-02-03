@@ -7,9 +7,3 @@ pub fn base64_str2bytes(s: &str) -> Result<Vec<u8>, DecodeError> {
 pub fn base64_bytes2str(bytes: Vec<u8>) -> String {
     encode(bytes)
 }
-
-
-#[cfg(test)]
-mod unit_test {
-    use super::*;
-}

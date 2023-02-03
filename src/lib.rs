@@ -1,5 +1,6 @@
 mod utils;
 mod serde;
+mod glue;
 
 extern crate wasm_bindgen;
 
@@ -9,17 +10,6 @@ use crate::serde::Serde;
 #[wasm_bindgen]
 extern {
     fn alert(s: &str);
-    fn atob(s: &str) -> String;
-    fn btoa(s: &str) -> String;
-}
-
-#[wasm_bindgen]
-pub fn window_atob(s: &str) -> String {
-    atob(s)
-}
-#[wasm_bindgen]
-pub fn window_btoa(s: &str) -> String {
-    btoa(s)
 }
 
 #[wasm_bindgen]

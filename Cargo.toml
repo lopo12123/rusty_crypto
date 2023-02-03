@@ -13,5 +13,8 @@ crate-type = ["cdylib"]
 aes = "0.8.2"
 base64 = "0.20.0-alpha.1"
 cbc = "0.1.2"
+js-sys = "0.3.60"
 md5 = "0.7.0"
 wasm-bindgen = "0.2.83"
+wasm-bindgen-test = "0.3.33"
+web-sys = { versio = "0.3.60", feature = [] }
