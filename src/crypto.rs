@@ -1,3 +1,4 @@
+mod core;
 mod v0;
 mod v1;
 mod v1fix;
