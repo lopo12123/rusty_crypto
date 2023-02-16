@@ -6,6 +6,10 @@ authors = ["lopo<lopo@zju.edu.cn>"]
 license = "MIT"
 keywords = ["crypto", "rusty", "wasm", "webassembly"]
 
+[profile.release]
+# 0 1 2 3 s z
+opt-level = "s"
+
 [lib]
 crate-type = ["cdylib"]
 
@@ -17,4 +21,4 @@ js-sys = "0.3.60"
 md5 = "0.7.0"
 wasm-bindgen = "0.2.83"
 wasm-bindgen-test = "0.3.33"
-web-sys = { versio = "0.3.60", feature = [] }
+web-sys = { versio = "0.3.60", feature = ["Window"] }
