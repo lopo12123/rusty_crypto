@@ -21,21 +21,16 @@ impl Core {
         (((byte_len as f32 / 16.0).floor() as usize) + 1) * 16
     }
 
-    /// 生成 key
-    fn generate_key(plain_key: String) -> [u8; 16] { MD5::calc_buf(plain_key) }
-
-    /// 生成 iv
-    fn generate_iv(plain_iv: String) -> [u8; 16] { MD5::calc_buf(plain_iv) }
-
     /// 加密(若加密失败则返回空字符串)
     pub fn encode_base64(plain_key: String, plain_iv: String, str: &str) -> String {
-        let iv = Self::generate_iv(plain_iv);
+        let iv = MD5::calc_buf(plain_iv);
+        let key = MD5::calc_buf(plain_key);
 
         // 大于原始字节长度的, 16的最小倍数 (注意: 16加密后为32, 类推)
         let buf_size = Self::calc_container_size(str);
         let mut result_container = vec![0u8; buf_size];
 
-        match Aes128CbcEnc::new(&Self::generate_key(plain_key).into(), &iv.into())
+        match Aes128CbcEnc::new(&key.into(), &iv.into())
             .encrypt_padded_b2b_mut::<Pkcs7>(str.as_bytes(), &mut result_container)
         {
             Ok(_) => Base64::encode(result_container),
@@ -45,12 +40,13 @@ impl Core {
 
     /// 解密(若加密失败则返回空字符串)
     pub fn decode_base64(plain_key: String, plain_iv: String, str: &str) -> String {
-        let iv = Self::generate_iv(plain_iv);
+        let iv = MD5::calc_buf(plain_iv);
+        let key = MD5::calc_buf(plain_key);
 
         // 解密后的字节长度不会超过密文的字节长度
         let mut buf = Base64::decode(str).unwrap();
 
-        match Aes128CbcDec::new(&Self::generate_key(plain_key).into(), &iv.into())
+        match Aes128CbcDec::new(&key.into(), &iv.into())
             .decrypt_padded_mut::<Pkcs7>(&mut buf) {
             Ok(result_buffer) => match String::from_utf8(result_buffer.to_vec()) {
                 Ok(result) => result,

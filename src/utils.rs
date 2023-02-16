@@ -40,3 +40,13 @@ pub fn random_str(len: usize) -> String {
         Err(_) => "a".repeat(len)
     }
 }
+
+#[cfg(test)]
+mod unit_test {
+    use super::*;
+
+    #[test]
+    fn md5() {
+        println!("{:?}", MD5::calc_buf("123".to_string()));
+    }
+}
