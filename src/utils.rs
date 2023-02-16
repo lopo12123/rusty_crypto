@@ -1,4 +1,5 @@
 use base64::{decode, DecodeError, encode};
+use js_sys::Math::random;
 use md5::Digest;
 
 pub struct Base64 {}
@@ -23,32 +24,19 @@ impl MD5 {
     pub fn calc_buf(str: String) -> [u8; 16] { md5::compute(str).0 }
 }
 
-#[cfg(test)]
-mod unit_test {
-    use super::*;
-
-    #[test]
-    fn base64_encode() {
-        let str = "hello";
-        let result = Base64::encode(str.as_bytes().to_vec());
-        println!("{}", result);
+/// 构建指定长度(1-20)的随机字符串 (a-z), 超过长度范围则返回 "a", 失败则返回以 "a" 填充的指定长度字符串
+pub fn random_str(len: usize) -> String {
+    if len <= 0 || len > 20 {
+        return String::from("a");
     }
 
-    #[test]
-    fn base64_decode() {
-        let str = "aGVsbG8=";
-        let result = Base64::decode(str);
+    let mut char_codes: Vec<u8> = vec![];
+    for _ in 0..len {
+        char_codes.push(97 + (random() * 26_f64).floor() as u8)
+    }
 
-
-        match result {
-            Ok(v) => {
-                println!("{:?}", v.clone());
-                println!("{:?}", String::from_utf8(v.clone()).unwrap().as_bytes());
-
-
-                println!("{}", String::from_utf8(v.clone()).unwrap())
-            }
-            Err(_) => println!("failed!"),
-        };
+    match String::from_utf8(char_codes) {
+        Ok(str) => str,
+        Err(_) => "a".repeat(len)
     }
 }
