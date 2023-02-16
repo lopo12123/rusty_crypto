@@ -44,7 +44,14 @@ impl Core {
         let key = MD5::calc_buf(plain_key);
 
         // 解密后的字节长度不会超过密文的字节长度
-        let mut buf = Base64::decode(str).unwrap();
+        let mut buf = vec![];
+
+        match Base64::decode(str) {
+            Ok(_buf) => buf = _buf,
+            Err(_) => {
+                return String::from("");
+            }
+        }
 
         match Aes128CbcDec::new(&key.into(), &iv.into())
             .decrypt_padded_mut::<Pkcs7>(&mut buf) {

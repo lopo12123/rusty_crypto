@@ -42,12 +42,8 @@ impl V2 {
 
     /// 注册. 可重复调用(为减少消耗建议先调用 [Self::is_registered] 查看), 新的结果会覆盖旧结果 (若新key无效等效于调用 [Self::unregister]). 返回注册结果
     pub unsafe fn register(key: &str) -> bool {
-        console_log!("key: {}", key);
-
         // 解密 register key 得到支持的 host
         let supported_host = V0::decode_base64(key);
-
-        console_log!("supported_host: {}", supported_host);
 
         // key 为空则直接返回 false
         if supported_host.len() == 0 { return false; }
