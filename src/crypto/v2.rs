@@ -4,6 +4,9 @@ use crate::glue::get_host;
 use crate::utils::random_str;
 use crate::V0;
 
+/// (key, iv, content)
+pub struct V2Content(String, String, String);
+
 /// 可加密的原文最大长度为 `u32.MAX - 1`
 #[wasm_bindgen]
 pub struct V2 {}
@@ -17,6 +20,21 @@ impl V2 {
     /// 解密得到 key
     fn unwrap_key(key: &str) -> String {
         V0::decode_base64(key)
+    }
+
+    /// 拆分 key iv 和 密文
+    fn split_content(content: &str) -> Result<V2Content, usize> {
+        let parts = content.split(".").collect::<Vec<&str>>();
+
+        if parts.len() != 3 {
+            return Err(parts.len());
+        }
+
+        Ok(V2Content(
+            parts[0].to_string(),
+            parts[1].to_string(),
+            parts[2].to_string(),
+        ))
     }
 
     /// 是否已注册
@@ -61,12 +79,21 @@ impl V2 {
     }
 
     /// 加密(若未注册或加密失败则返回空字符串)
-    pub fn encode_base64(str: &str) -> String {
+    pub fn encode_base64(str: &str, key_len: Option<usize>, iv_len: Option<usize>) -> String {
         if !Self::is_registered() {
             return String::from("");
         }
 
-        Core::encode_base64(random_str(1), random_str(1), str)
+        let key = random_str(match key_len {
+            Some(v) => v,
+            None => 10
+        });
+        let iv = random_str(match iv_len {
+            Some(v) => v,
+            None => 10
+        });
+
+        format!("{}.{}.{}", key, iv, Core::encode_base64(key.clone(), iv.clone(), str))
     }
 
     /// 解密(若未注册或加密失败则返回空字符串)
@@ -75,6 +102,21 @@ impl V2 {
             return String::from("");
         }
 
-        Core::decode_base64(random_str(1), random_str(1), str)
+        match Self::split_content(str) {
+            Ok(parts) => Core::decode_base64(parts.0, parts.1, &parts.2),
+            Err(_) => String::from("")
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    fn split_str(s: &str) -> Vec<&str> {
+        s.split(".").collect()
+    }
+
+    #[test]
+    fn t() {
+        println!("tuples: {:#?}", split_str("a.bc"))
     }
 }
