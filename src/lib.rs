@@ -13,6 +13,8 @@ extern {
 
 pub use crypto::V0;
 pub use crypto::V1;
+pub use crypto::V1Fix;
+pub use crypto::V2;
 
 #[wasm_bindgen]
 pub fn greet() {
