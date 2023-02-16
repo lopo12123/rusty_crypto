@@ -1,5 +1,4 @@
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen_test::console_log;
 use crate::crypto::core::Core;
 use crate::glue::get_host;
 use crate::utils::random_str;
