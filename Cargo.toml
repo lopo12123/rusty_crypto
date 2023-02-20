@@ -8,7 +8,7 @@ keywords = ["crypto", "rusty", "wasm", "webassembly"]
 
 [profile.release]
 # 0 1 2 3 s z
-opt-level = "s"
+# opt-level = "s"  # default to 3
 
 [lib]
 crate-type = ["cdylib"]
